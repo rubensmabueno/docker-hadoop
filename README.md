@@ -1,6 +1,6 @@
 # Project: Hadoop Docker Image
 
-This is an open-source project that provides a Docker image with Hadoop and JMX Exporter pre-installed. The Docker image is based on OpenJDK 8 and includes Hadoop version 2.9.1.
+This is an open-source project that provides a Docker image with Hadoop and JMX Exporter pre-installed. The Docker image is based on OpenJDK 8 and includes Hadoop version 2.10.2.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ This is an open-source project that provides a Docker image with Hadoop and JMX 
 ## Features
 
 - OpenJDK 8 as the base image.
-- Hadoop 2.9.1 pre-installed.
+- Hadoop 2.10.2 pre-installed.
 - JMX Exporter 0.3.1 pre-installed for monitoring.
 
 ## Prerequisites
