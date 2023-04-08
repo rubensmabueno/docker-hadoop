@@ -1,0 +1,21 @@
+---
+startDelaySeconds: 0
+rules:
+  - pattern: "Hadoop<service=NameNode, name=FSNamesystem><>(.*)"
+    name: "hadoop_namenode fs_name_sytem $1"
+    help: "Hadoop NameNode: FS Name System $1"
+    type: GAUGE
+  - pattern: "Hadoop<service=NameNode, name=RpcActivityForPort(.*)><>(.*)"
+    name: "hadoop_namenode rpc_activity $2"
+    help: "Hadoop NameNode: RpcActivity $2"
+    type: GAUGE
+    labels:
+      port: "$1"
+  - pattern: "jvm_memory_bytes_(.*)"
+    name: "hadoop_namenode jvm_memory $1"
+    help: "Hadoop NameNode: JVM Memory $1"
+    type: GAUGE
+  - pattern: "java.lang<type=OperatingSystem><>(.*)"
+    name: "hadoop_namenode operation_system $1"
+    help: "Hadoop NameNode: Operating System $1"
+    type: GAUGE

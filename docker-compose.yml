@@ -1,0 +1,41 @@
+version: '3'
+services:
+  namenode:
+    build: .
+    command: hdfs namenode
+    ports:
+      - 8020:8020
+      - 50070:50070
+      - 5556:5556
+    environment:
+      - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
+    volumes:
+      - "./config:/etc/hadoop:ro"
+      - "./tmp/namenode:/hadoop/dfs/name"
+      - "./config/jmx-namenode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
+  datanode-1:
+    build: .
+    command: hdfs datanode
+    ports:
+      - 5557:5556
+    environment:
+      - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
+    depends_on:
+      - namenode
+    volumes:
+      - "./config:/etc/hadoop:ro"
+      - "./tmp/datanode-1:/hadoop/dfs/data"
+      - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
+  datanode-2:
+    build: .
+    command: hdfs datanode
+    ports:
+      - 5558:5556
+    environment:
+      - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
+    depends_on:
+      - namenode
+    volumes:
+      - "./config:/etc/hadoop:ro"
+      - "./tmp/datanode-2:/hadoop/dfs/data"
+      - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"

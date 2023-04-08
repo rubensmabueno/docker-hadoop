@@ -1,0 +1,23 @@
+---
+startDelaySeconds: 0
+rules:
+  - pattern: "Hadoop<service=DataNode, name=DataNodeActivity-(.*)><>(.*)"
+    name: "hadoop_datanode activity $2"
+    help: "Hadoop DataNode: Activity $2"
+    type: GAUGE
+    labels:
+      worker_id: "$1"
+  - pattern: "Hadoop<service=DataNode, name=RpcActivityForPort(.*)><>(.*)"
+    name: "hadoop_datanode rpc_activity $2"
+    help: "Hadoop DataNode: RPC Activity $2"
+    type: GAUGE
+    labels:
+      port: "$1"
+  - pattern: "jvm_memory_bytes_(.*)"
+    name: "hadoop_datanode jvm_memory $1"
+    help: "Hadoop DataNode: JVM Memory $1"
+    type: GAUGE
+  - pattern: "java.lang<type=OperatingSystem><>(.*)"
+    name: "hadoop_datanode operation_system $1"
+    help: "Hadoop DataNode: Operating System $1"
+    type: GAUGE
