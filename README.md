@@ -48,7 +48,7 @@ version: '3'
 
 services:
   namenode:
-      image: rubensmabueno/hadoop
+      image: rubensminoru/hadoop
       command: hdfs namenode
       ports:
         - 8020:8020
@@ -66,7 +66,7 @@ services:
         timeout: 10s
         retries: 5
     datanode-1:
-      image: rubensmabueno/hadoop
+      image: rubensminoru/hadoop
       command: hdfs datanode
       ports:
         - 5557:5556
@@ -80,7 +80,7 @@ services:
         - "./config:/etc/hadoop:ro"
         - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
     datanode-2:
-      image: rubensmabueno/hadoop
+      image: rubensminoru/hadoop
       command: hdfs datanode
       ports:
         - 5558:5556
@@ -104,7 +104,7 @@ docker run -d --name namenode -p 5556:5556 -p 50070:50070 -p 8020:8020 \
   -v "$(pwd)/config:/etc/hadoop:ro" \
   -v "$(pwd)/config/jmx-namenode-config.yml:/opt/jmx_prometheus_javaagent/config.yml" \
   -e "HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml" \
-  rubensmabueno/hadoop hdfs namenode
+  rubensminoru/hadoop hdfs namenode
 ```
 
 2. Create Datanode containers:
@@ -115,7 +115,7 @@ docker run -d --name datanode-1 -p 5557:5556 \
   -v "$(pwd)/config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml" \
   -e "HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml" \
   --link datanode-1:namenode \
-  rubensmabueno/hadoop hdfs datanode
+  rubensminoru/hadoop hdfs datanode
 
 docker run -d --name datanode-2 -p 5558:5556 \
   -v "$(pwd)/tmp/datanode-2:/hadoop/dfs/data" \
@@ -123,7 +123,7 @@ docker run -d --name datanode-2 -p 5558:5556 \
   -v "$(pwd)/config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml" \
   -e "HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml" \
   --link datanode-2:namenode \
-  rubensmabueno/hadoop hdfs datanode
+  rubensminoru/hadoop hdfs datanode
 ```
 
 ### Accessing

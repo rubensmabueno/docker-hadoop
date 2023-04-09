@@ -29,6 +29,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -36,6 +40,6 @@ jobs:
           push: true
           tags: |
             rubensminoru/hadoop:latest
-            rubensminoru/hadoop:${{ github.ref }}
+            rubensminoru/hadoop:${{ steps.get_version.outputs.VERSION }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
