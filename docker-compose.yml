@@ -5,14 +5,19 @@ services:
     command: hdfs namenode
     ports:
       - 8020:8020
-      - 50070:50070
+      - 50070:50070  # NameNode
       - 5556:5556
     environment:
       - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
     volumes:
-      - "./config:/etc/hadoop:ro"
       - "./tmp/namenode:/hadoop/dfs/name"
+      - "./config:/etc/hadoop:ro"
       - "./config/jmx-namenode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:50070/ || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   datanode-1:
     build: .
     command: hdfs datanode
@@ -21,10 +26,11 @@ services:
     environment:
       - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
     depends_on:
-      - namenode
+      namenode:
+        condition: service_healthy
     volumes:
-      - "./config:/etc/hadoop:ro"
       - "./tmp/datanode-1:/hadoop/dfs/data"
+      - "./config:/etc/hadoop:ro"
       - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
   datanode-2:
     build: .
@@ -34,8 +40,9 @@ services:
     environment:
       - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
     depends_on:
-      - namenode
+      namenode:
+        condition: service_healthy
     volumes:
-      - "./config:/etc/hadoop:ro"
       - "./tmp/datanode-2:/hadoop/dfs/data"
+      - "./config:/etc/hadoop:ro"
       - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"

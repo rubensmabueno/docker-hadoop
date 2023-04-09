@@ -2,11 +2,8 @@ name: Publish Docker Image
 
 on:
   push:
-    branches:
-      - main
-  release:
-    types:
-      - created
+    tags:
+      - '*'
 
 jobs:
   docker:
@@ -39,6 +36,6 @@ jobs:
           push: true
           tags: |
             rubensminoru/hadoop:latest
-            rubensminoru/hadoop:${{ github.sha }}
+            rubensminoru/hadoop:${{ github.ref }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache

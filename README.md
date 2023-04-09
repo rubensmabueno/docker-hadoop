@@ -23,10 +23,16 @@ This is an open-source project that provides a Docker image with Hadoop and JMX 
 - Docker installed on your system.
 
 ## Installation
+There is no need to install the Docker image as it is available on DockerHub. You can download the image using the following command:
 
+```bash
+docker pull rubensminoru/hadoop
+```
+
+### Building image manually
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/your-repo.git
+git clone https://github.com/rubensmabueno/docker-hadoop.git
 ```
 
 2. Build the Docker image:
@@ -36,17 +42,96 @@ docker build -t your-image-name .
 ```
 
 ## Usage
-1. Create a Hadoop container:
-```bash
-docker run -d --name your-container-name -p 5556:5556 -p 50070:50070 -p 8088:8088 your-image-name
+### Option 1: Using Docker Compose
+```yaml
+version: '3'
+
+services:
+  namenode:
+      image: rubensmabueno/hadoop
+      command: hdfs namenode
+      ports:
+        - 8020:8020
+        - 50070:50070
+        - 5556:5556
+      environment:
+        - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
+      volumes:
+        - "./tmp/namenode:/hadoop/dfs/name"
+        - "./config:/etc/hadoop:ro"
+        - "./config/jmx-namenode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
+      healthcheck:
+        test: [ "CMD-SHELL", "curl --fail http://localhost:50070/ || exit 1" ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    datanode-1:
+      image: rubensmabueno/hadoop
+      command: hdfs datanode
+      ports:
+        - 5557:5556
+      environment:
+        - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
+      depends_on:
+        namenode:
+          condition: service_healthy
+      volumes:
+        - "./tmp/datanode-1:/hadoop/dfs/data"
+        - "./config:/etc/hadoop:ro"
+        - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
+    datanode-2:
+      image: rubensmabueno/hadoop
+      command: hdfs datanode
+      ports:
+        - 5558:5556
+      environment:
+        - HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml
+      depends_on:
+        namenode:
+          condition: service_healthy
+      volumes:
+        - "./tmp/datanode-2:/hadoop/dfs/data"
+        - "./config:/etc/hadoop:ro"
+        - "./config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml"
 ```
 
-2. Access the Hadoop Web UI:
+### Option 2: Using Docker run
+
+1. Create a NameNode container:
+```bash
+docker run -d --name namenode -p 5556:5556 -p 50070:50070 -p 8020:8020 \
+  -v "$(pwd)/tmp/namenode:/hadoop/dfs/name" \
+  -v "$(pwd)/config:/etc/hadoop:ro" \
+  -v "$(pwd)/config/jmx-namenode-config.yml:/opt/jmx_prometheus_javaagent/config.yml" \
+  -e "HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml" \
+  rubensmabueno/hadoop hdfs namenode
+```
+
+2. Create Datanode containers:
+```bash
+docker run -d --name datanode-1 -p 5557:5556 \
+  -v "$(pwd)/tmp/datanode-1:/hadoop/dfs/data" \
+  -v "$(pwd)/config:/etc/hadoop:ro" \
+  -v "$(pwd)/config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml" \
+  -e "HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml" \
+  --link datanode-1:namenode \
+  rubensmabueno/hadoop hdfs datanode
+
+docker run -d --name datanode-2 -p 5558:5556 \
+  -v "$(pwd)/tmp/datanode-2:/hadoop/dfs/data" \
+  -v "$(pwd)/config:/etc/hadoop:ro" \
+  -v "$(pwd)/config/jmx-datanode-config.yml:/opt/jmx_prometheus_javaagent/config.yml" \
+  -e "HADOOP_OPTS=-javaagent:/opt/jmx_prometheus_javaagent/jmx_prometheus_javaagent.jar=5556:/opt/jmx_prometheus_javaagent/config.yml" \
+  --link datanode-2:namenode \
+  rubensmabueno/hadoop hdfs datanode
+```
+
+### Accessing
+1. Access the Hadoop Web UI:
 
 - NameNode: `http://localhost:50070`
-- ResourceManager: `http://localhost:8088`
 
-3. Access the JMX Exporter metrics:
+2. Access the JMX Exporter metrics:
 
 ```bash
 http://localhost:5556/metrics

@@ -30,4 +30,14 @@ RUN curl -fSL https://dlcdn.apache.org/hadoop/common/hadoop-$HADOOP_VERSION/hado
 
 RUN mkdir -p /hadoop/dfs/name && mkdir -p /hadoop/dfs/data
 
+# Copy default configs
+ADD config/core-site.xml /etc/hadoop/core-site.xml
+ADD config/hdfs-site.xml /etc/hadoop/hdfs-site.xml
+ADD config/hadoop-metrics2.properties /etc/hadoop/hadoop-metrics2.properties
+
 ENV PATH $HADOOP_HOME/bin/:$PATH
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
